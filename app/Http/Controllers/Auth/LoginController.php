@@ -31,7 +31,7 @@ class LoginController extends Controller
     {
         if ($user->role === 'petani') {
             return redirect('/petani/dashboard');
-        } elseif ($user->role === 'ricemill') {
+        } elseif ($user->role === 'rice_mill') {
             return redirect('/ricemill/dashboard');
         } elseif ($user->role === 'packager') {
             return redirect('/packager/dashboard');
