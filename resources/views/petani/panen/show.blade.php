@@ -75,8 +75,8 @@
                     @if($panen->bukti_foto)
                     <div class="col-12" style="margin-top:8px;">
                         <div style="font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Bukti Foto</div>
-                        <a href="{{ Storage::url($panen->bukti_foto) }}" target="_blank">
-                            <img src="{{ Storage::url($panen->bukti_foto) }}"
+                        <a href="{{ asset('storage/' . $panen->bukti_foto) }}" target="_blank">
+                            <img src="{{ asset('storage/' . $panen->bukti_foto) }}"
                                  style="max-width:300px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);">
                         </a>
                     </div>
