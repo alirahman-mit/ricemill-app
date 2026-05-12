@@ -7,7 +7,15 @@ use App\Http\Controllers\Petani\ProfilLahanController;
 use App\Http\Controllers\Petani\RiwayatPanenController;
 use App\Http\Controllers\Petani\SetoranController;
 use App\Http\Controllers\RiceMill\DashboardController  as RiceMillDashboard;
+use App\Http\Controllers\RiceMill\PenerimaanGabahController;
+use App\Http\Controllers\RiceMill\OperasionalController;
+use App\Http\Controllers\RiceMill\ProduksiController;
+use App\Http\Controllers\RiceMill\PengirimanController;
+use App\Http\Controllers\RiceMill\KeuanganController;
 use App\Http\Controllers\Packager\DashboardController  as PackagerDashboard;
+use App\Http\Controllers\Packager\PenerimaanBerasController;
+use App\Http\Controllers\Packager\PengemasanController;
+use App\Http\Controllers\Packager\PesananController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,34 +43,34 @@ Route::middleware(['auth'])->prefix('petani')->name('petani.')->group(function (
 Route::middleware(['auth'])->prefix('ricemill')->name('ricemill.')->group(function () {
     Route::get('/dashboard', [RiceMillDashboard::class, 'index'])->name('dashboard');
 
-    // Penerimaan Gabah (task 4.x)
-    Route::get('/penerimaan-gabah',            fn() => view('ricemill.dashboard'))->name('penerimaan-gabah.index');
-    Route::get('/penerimaan-gabah/create',     fn() => view('ricemill.dashboard'))->name('penerimaan-gabah.create');
+    // Penerimaan Gabah
+    Route::get('/penerimaan-gabah',            [PenerimaanGabahController::class, 'index'])->name('penerimaan-gabah.index');
+    Route::get('/penerimaan-gabah/create',     [PenerimaanGabahController::class, 'create'])->name('penerimaan-gabah.create');
 
-    // Operasional Penggilingan (task 5.x)
-    Route::get('/operasional',                 fn() => view('ricemill.dashboard'))->name('operasional.index');
+    // Operasional Penggilingan
+    Route::get('/operasional',                 [OperasionalController::class, 'index'])->name('operasional.index');
 
-    // Riwayat Produksi (task 6.x)
-    Route::get('/produksi',                    fn() => view('ricemill.dashboard'))->name('produksi.index');
+    // Riwayat Produksi
+    Route::get('/produksi',                    [ProduksiController::class, 'index'])->name('produksi.index');
 
-    // Pengiriman Beras ke Packager (task 7.x)
-    Route::get('/pengiriman',                  fn() => view('ricemill.dashboard'))->name('pengiriman.index');
+    // Pengiriman Beras ke Packager
+    Route::get('/pengiriman',                  [PengirimanController::class, 'index'])->name('pengiriman.index');
 
-    // Keuangan (task 8.x)
-    Route::get('/keuangan',                    fn() => view('ricemill.dashboard'))->name('keuangan.index');
+    // Keuangan
+    Route::get('/keuangan',                    [KeuanganController::class, 'index'])->name('keuangan.index');
 });
 
 // ── Packager Routes ────────────────────────────────────────────────────────
 Route::middleware(['auth'])->prefix('packager')->name('packager.')->group(function () {
     Route::get('/dashboard', [PackagerDashboard::class, 'index'])->name('dashboard');
 
-    // Penerimaan Beras Putih (task 9.x)
-    Route::get('/penerimaan-beras',            fn() => view('packager.dashboard'))->name('penerimaan-beras.index');
-    Route::get('/penerimaan-beras/create',     fn() => view('packager.dashboard'))->name('penerimaan-beras.create');
+    // Penerimaan Beras Putih
+    Route::get('/penerimaan-beras',            [PenerimaanBerasController::class, 'index'])->name('penerimaan-beras.index');
+    Route::get('/penerimaan-beras/create',     [PenerimaanBerasController::class, 'create'])->name('penerimaan-beras.create');
 
-    // Hasil Pengemasan (task 10.x)
-    Route::get('/pengemasan',                  fn() => view('packager.dashboard'))->name('pengemasan.index');
+    // Hasil Pengemasan
+    Route::get('/pengemasan',                  [PengemasanController::class, 'index'])->name('pengemasan.index');
 
-    // Pesanan Masuk (task 11.x)
-    Route::get('/pesanan',                     fn() => view('packager.dashboard'))->name('pesanan.index');
+    // Pesanan Masuk
+    Route::get('/pesanan',                     [PesananController::class, 'index'])->name('pesanan.index');
 });
