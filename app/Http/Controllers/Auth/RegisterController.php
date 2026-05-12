@@ -34,7 +34,7 @@ class RegisterController extends Controller
             'name'     => ['required', 'string', 'max:255'],
             'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role'     => ['required', 'string', 'in:petani,ricemill,packager'],
+            'role'     => ['required', 'string', 'in:petani,rice_mill,packager'],
         ]);
     }
 
@@ -56,7 +56,7 @@ class RegisterController extends Controller
      */
     protected function registered(\Illuminate\Http\Request $request, $user)
     {
-        if ($user->role === 'ricemill') {
+        if ($user->role === 'rice_mill') {
             return redirect('/ricemill/dashboard');
         } elseif ($user->role === 'packager') {
             return redirect('/packager/dashboard');

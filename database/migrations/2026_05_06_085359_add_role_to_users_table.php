@@ -8,12 +8,15 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     * 
+     * Note: The role column is already defined in the main users table migration
+     * (0001_01_01_000000_create_users_table.php). This migration is kept for
+     * historical compatibility but the actual column definition is in the main migration.
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
-        });
+        // Role column is already added in the main users table migration
+        // No action needed here to avoid duplicate column errors
     }
 
     /**
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
-        });
+        // No action needed - role column is defined in main migration
     }
 };

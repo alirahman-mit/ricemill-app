@@ -495,8 +495,8 @@
 
                     <!-- Rice Mill -->
                     <div class="role-option">
-                        <input type="radio" name="role" id="role-ricemill" value="ricemill" required
-                               {{ old('role') === 'ricemill' ? 'checked' : '' }}>
+                        <input type="radio" name="role" id="role-ricemill" value="rice_mill" required
+                               {{ old('role') === 'rice_mill' ? 'checked' : '' }}>
                         <label for="role-ricemill" class="role-label">
                             <div class="role-icon-box">
                                 <i data-lucide="factory"></i>
