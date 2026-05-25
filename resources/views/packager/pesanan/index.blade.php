@@ -11,6 +11,57 @@
 @endsection
 
 @section('content')
+
+{{-- STATISTIK RINGKAS --}}
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(234, 179, 8, 0.12); color: #ca8a04;">
+                <span class="iconify" data-icon="heroicons:star"></span>
+            </div>
+            <div>
+                <div class="stat-value" style="font-size:1.1rem;">
+                    @if($terlaris)
+                        {{ $terlaris->jenis_produk }}
+                    @else
+                        <span style="font-size:.85rem;color:#9ca3af;">Belum ada data</span>
+                    @endif
+                </div>
+                <div class="stat-label">🏆 Produk Terlaris</div>
+                @if($terlaris)
+                    <div style="font-size:.78rem;color:#6b7280;margin-top:2px;">
+                        Total terjual: <strong>{{ number_format($terlaris->total_qty) }} pcs</strong>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(22, 163, 74, 0.1); color: #16a34a;">
+                <span class="iconify" data-icon="heroicons:shopping-bag"></span>
+            </div>
+            <div>
+                <div class="stat-value">{{ $pesanan->total() }}</div>
+                <div class="stat-label">Total Pesanan</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                <span class="iconify" data-icon="heroicons:banknotes"></span>
+            </div>
+            <div>
+                <div class="stat-value" style="font-size:1.05rem;">
+                    Rp {{ number_format($pesanan->sum('total_harga'), 0, ',', '.') }}
+                </div>
+                <div class="stat-label">Total Pendapatan (halaman ini)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-header-clean">
         <h5>Daftar Pesanan dari Pelanggan</h5>

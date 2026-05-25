@@ -49,9 +49,18 @@
                     </td>
                     <td>
                         <div class="d-flex gap-2">
-                            <a href="{{ route('ricemill.pengiriman.edit', $item) }}" class="btn-outline-custom btn-sm">
+                            <a href="{{ route('ricemill.pengiriman.edit', $item) }}" class="btn-outline-custom btn-sm"
+                               title="Edit">
                                 <span class="iconify" data-icon="heroicons:pencil" style="width:14px;height:14px;"></span>
                             </a>
+                            <form action="{{ route('ricemill.pengiriman.destroy', $item) }}" method="POST"
+                                  onsubmit="return confirm('Yakin ingin menghapus data pengiriman ini?')">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="btn-outline-custom btn-sm"
+                                        style="color:#c0392b;border-color:#f5b8b8;" title="Hapus">
+                                    <span class="iconify" data-icon="heroicons:trash" style="width:14px;height:14px;"></span>
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>

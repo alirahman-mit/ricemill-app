@@ -14,7 +14,7 @@ class RiwayatProduksi extends Model
     protected $fillable = [
         'user_id', 'operasional_id', 'batch_id',
         'tanggal_proses', 'jumlah_gabah', 'jumlah_beras',
-        'notifikasi_rendemen_rendah', 'catatan',
+        'jenis_beras', 'notifikasi_rendemen_rendah', 'catatan',
     ];
 
     protected $casts = [
@@ -31,6 +31,18 @@ class RiwayatProduksi extends Model
     {
         if (!$this->jumlah_gabah || $this->jumlah_gabah == 0) return 0;
         return round(($this->jumlah_beras / $this->jumlah_gabah) * 100, 1);
+    }
+
+    public function getJenisBerasLabelAttribute(): string
+    {
+        return match($this->jenis_beras) {
+            'premium'      => 'Premium',
+            'medium'       => 'Medium',
+            'setra_ramos'  => 'Setra Ramos',
+            'pandan_wangi' => 'Pandan Wangi',
+            'biasa'        => 'Biasa',
+            default        => $this->jenis_beras ?? '-',
+        };
     }
 
     public function operator()

@@ -34,7 +34,40 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label-custom">Jumlah Hasil Beras (Kg)</label>
-                            <input type="number" step="0.01" class="form-control-custom" name="jumlah_beras" placeholder="0" required>
+                            <input type="number" step="0.01" id="jumlah_beras" class="form-control-custom" name="jumlah_beras" placeholder="0" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Jenis Beras yang Dihasilkan <span class="text-danger">*</span></label>
+                            <select class="form-select-custom" name="jenis_beras" id="jenis_beras" required>
+                                <option value="">-- Pilih Jenis Beras --</option>
+                                <option value="premium">⭐ Premium</option>
+                                <option value="medium">🌾 Medium</option>
+                                <option value="setra_ramos">🌿 Setra Ramos</option>
+                                <option value="pandan_wangi">🍃 Pandan Wangi</option>
+                                <option value="biasa">🫘 Biasa</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-custom">Preview Rendemen</label>
+                            <div id="rendemen-preview" style="
+                                padding:11px 14px;
+                                border-radius:10px;
+                                background:#f0fdf4;
+                                border:1px solid #b2dcc4;
+                                font-size:.9rem;
+                                color:#1a5c38;
+                                font-weight:600;
+                                min-height:42px;
+                                display:flex;
+                                align-items:center;
+                                gap:8px;
+                            ">
+                                <span class="iconify" data-icon="heroicons:calculator" style="width:18px;"></span>
+                                <span id="rendemen-value">Masukkan jumlah beras...</span>
+                            </div>
                         </div>
                     </div>
 
@@ -57,3 +90,44 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Data gabah per operasional (ambil dari PHP ke JS)
+    const gabahData = {
+        @foreach($operasional as $item)
+            {{ $item->id }}: {{ $item->jumlah_gabah_masuk }},
+        @endforeach
+    };
+
+    const selectOp  = document.querySelector('[name="operasional_id"]');
+    const inputBeras = document.getElementById('jumlah_beras');
+    const previewBox = document.getElementById('rendemen-preview');
+    const previewVal = document.getElementById('rendemen-value');
+
+    function hitungRendemen() {
+        const opId   = selectOp.value;
+        const beras  = parseFloat(inputBeras.value);
+        const gabah  = gabahData[opId];
+
+        if (!opId || !gabah || !beras || beras <= 0) {
+            previewVal.textContent = 'Pilih batch & masukkan jumlah beras...';
+            previewBox.style.background = '#f0fdf4';
+            previewBox.style.borderColor = '#b2dcc4';
+            previewBox.style.color = '#1a5c38';
+            return;
+        }
+
+        const rendemen = ((beras / gabah) * 100).toFixed(1);
+        const rendah   = parseFloat(rendemen) < 60;
+
+        previewVal.textContent = `Rendemen: ${rendemen}% ${rendah ? '⚠️ DI BAWAH STANDAR (min. 60%)' : '✅ Normal'}`;
+        previewBox.style.background = rendah ? '#fef2f2' : '#f0fdf4';
+        previewBox.style.borderColor = rendah ? '#fca5a5' : '#b2dcc4';
+        previewBox.style.color       = rendah ? '#991b1b' : '#1a5c38';
+    }
+
+    selectOp.addEventListener('change', hitungRendemen);
+    inputBeras.addEventListener('input',  hitungRendemen);
+</script>
+@endpush

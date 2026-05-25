@@ -20,7 +20,33 @@ class PengemasanController extends Controller
             ->latest('tanggal')
             ->paginate(10);
 
-        return view('packager.pengemasan.index', compact('pengemasan'));
+        // Chart 1: Jumlah produksi per hari (14 hari terakhir) — Bar Chart
+        $chartHarian = HasilPengemasan::where('user_id', Auth::id())
+            ->selectRaw('DATE(tanggal) as tgl, SUM(jumlah_kemasan) as total')
+            ->where('tanggal', '>=', now()->subDays(13)->startOfDay())
+            ->groupBy('tgl')
+            ->orderBy('tgl')
+            ->get()
+            ->keyBy('tgl');
+
+        // Isi tanggal yang kosong agar chart lengkap 14 hari
+        $harian = [];
+        for ($i = 13; $i >= 0; $i--) {
+            $tgl = now()->subDays($i)->format('Y-m-d');
+            $harian[] = [
+                'label' => now()->subDays($i)->format('d M'),
+                'total' => $chartHarian->get($tgl)?->total ?? 0,
+            ];
+        }
+
+        // Chart 2: Distribusi jenis kemasan — Pie Chart
+        $chartKemasan = HasilPengemasan::where('user_id', Auth::id())
+            ->selectRaw('jenis_kemasan, SUM(jumlah_kemasan) as total')
+            ->groupBy('jenis_kemasan')
+            ->orderByDesc('total')
+            ->get();
+
+        return view('packager.pengemasan.index', compact('pengemasan', 'harian', 'chartKemasan'));
     }
 
     public function create()

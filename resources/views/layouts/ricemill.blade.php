@@ -544,6 +544,13 @@
         </div>
         @endif
 
+        @if(session('warning'))
+        <div class="alert-clean mb-4" style="background:#fef9c3;border-color:#fde047;color:#854d0e;">
+            <span class="iconify" data-icon="heroicons:exclamation-triangle" style="width:20px;height:20px;color:#ca8a04;"></span>
+            <strong>Peringatan:</strong> {{ session('warning') }}
+        </div>
+        @endif
+
         @if(session('error'))
         <div class="alert-clean alert-danger-clean mb-4">
             <span class="iconify" data-icon="heroicons:x-circle" style="width:20px;height:20px;"></span>
