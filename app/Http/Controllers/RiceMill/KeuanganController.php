@@ -9,9 +9,18 @@ use Illuminate\Support\Facades\Auth;
 
 class KeuanganController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    // Daftar kategori yang valid — sinkron dengan view
+    const KATEGORI_VALID = [
+        'Penjualan Beras',
+        'Jasa Penggilingan',
+        'Biaya Listrik/Mesin',
+        'Gaji Karyawan',
+        'Logistik/Transport',
+        'Pembelian Bahan Baku',
+        'Perawatan Mesin',
+        'Lain-lain',
+    ];
+
     public function index()
     {
         $keuangan = KeuanganRicemill::where('user_id', Auth::id())
@@ -29,11 +38,14 @@ class KeuanganController extends Controller
 
     public function create()
     {
-        return view('ricemill.keuangan.create');
+        $kategoriList = self::KATEGORI_VALID;
+        return view('ricemill.keuangan.create', compact('kategoriList'));
     }
 
     public function store(Request $request)
     {
+        $kategoriValid = implode(',', array_map(fn($k) => '"' . $k . '"', self::KATEGORI_VALID));
+
         $validated = $request->validate([
             'tipe'       => 'required|in:pemasukan,pengeluaran',
             'kategori'   => 'required|string|max:100',
