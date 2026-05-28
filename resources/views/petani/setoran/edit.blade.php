@@ -95,7 +95,7 @@
 
             <div class="d-flex gap-3 mt-4">
                 <button type="submit" class="btn-primary-custom">
-                    <i data-lucide="save" style="width:16px;height:16px;"></i> Update Setoran
+                    <span class="iconify" data-icon="heroicons:check" style="width:16px;height:16px;"></span> Update Setoran
                 </button>
                 <a href="{{ route('petani.setoran.index') }}" class="btn-outline-custom">Batal</a>
             </div>

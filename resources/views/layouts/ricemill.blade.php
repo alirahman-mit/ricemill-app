@@ -31,6 +31,7 @@
             --text-muted:   #6b7c6e;
             --border:       #dde5de;
             --sidebar-w:    265px;
+            --sidebar-mini: 68px;
         }
 
         * { box-sizing: border-box; }
@@ -54,7 +55,8 @@
             display: flex;
             flex-direction: column;
             z-index: 100;
-            transition: transform .3s ease;
+            overflow: hidden;
+            transition: width .3s ease;
         }
 
         .sidebar-logo {
@@ -442,10 +444,131 @@
         .dot-diproses { background: #16a34a; }
         .dot-selesai  { background: #16a34a; }
 
+        /* ===== MINI SIDEBAR (DESKTOP COLLAPSED) ===== */
+        .sidebar.collapsed {
+            width: var(--sidebar-mini);
+        }
+
+        .main-content {
+            transition: margin-left .3s ease;
+        }
+
+        body.sidebar-collapsed .main-content {
+            margin-left: var(--sidebar-mini);
+        }
+
+        /* Hide text when mini */
+        .sidebar.collapsed .nav-text,
+        .sidebar.collapsed .nav-section-label,
+        .sidebar.collapsed .brand-text,
+        .sidebar.collapsed .sidebar-logo .sub,
+        .sidebar.collapsed .sidebar-logo .role-badge,
+        .sidebar.collapsed .user-info {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .sidebar.collapsed .nav-link {
+            justify-content: center;
+            padding: 11px 0;
+            gap: 0;
+        }
+
+        .sidebar.collapsed .sidebar-logo {
+            padding: 20px 0;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+
+        .sidebar.collapsed .sidebar-logo .brand {
+            justify-content: center;
+            width: 100%;
+            gap: 0 !important;
+        }
+
+        .sidebar.collapsed .sidebar-user {
+            padding: 14px 0;
+            justify-content: center;
+        }
+
+        .sidebar.collapsed .sidebar-user .d-flex {
+            justify-content: center;
+            gap: 0;
+        }
+
+        .sidebar.collapsed .sidebar-footer .nav-link {
+            justify-content: center;
+            padding: 11px 0;
+        }
+
+        .nav-text, .brand-text, .user-info {
+            transition: opacity .2s ease, width .2s ease;
+        }
+
+        .sidebar.collapsed .nav-link {
+            position: relative;
+        }
+
+        .sidebar.collapsed .nav-link:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: calc(var(--sidebar-mini) + 8px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1c2b1e;
+            color: #fff;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: .8rem;
+            white-space: nowrap;
+            z-index: 200;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,.2);
+        }
+
+        /* Toggle button */
+        .sidebar-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: all .18s;
+            color: var(--text-main);
+        }
+
+        .sidebar-toggle-btn:hover {
+            border-color: var(--primary);
+            background: rgba(26,92,56,.05);
+            color: var(--primary);
+        }
+
+        /* Overlay untuk mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.45);
+            z-index: 99;
+            backdrop-filter: blur(2px);
+        }
+
+        .sidebar-overlay.visible { display: block; }
+
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
+            .sidebar { transform: translateX(-100%); width: var(--sidebar-w) !important; }
             .sidebar.open { transform: translateX(0); }
-            .main-content { margin-left: 0; }
+            .sidebar.collapsed { transform: translateX(-100%); }
+            .main-content { margin-left: 0 !important; }
         }
     </style>
 
@@ -455,18 +578,18 @@
 
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-        <div class="brand flex items-center gap-2" style="display:flex; align-items:center; gap:8px;">
-            <span class="iconify text-[#8B5A2B]" data-icon="heroicons:building-office-2" style="width:24px; height:24px;"></span>
-            SiMonTani
+        <div class="brand" style="display:flex; align-items:center; gap:8px; white-space:nowrap;">
+            <span class="iconify" data-icon="heroicons:building-office-2" style="width:26px; height:26px; color:#fbbf24; flex-shrink:0;"></span>
+            <span class="brand-text" style="font-family:'DM Serif Display',serif;font-size:1.15rem;color:#fff;letter-spacing:.02em;">SiMonTani</span>
         </div>
-        <div class="sub">Management System</div>
-        <div class="role-badge">Rice Mill Operator</div>
+        <div class="sub" style="font-size:.72rem;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.1em;margin-top:4px;">Management System</div>
+        <div class="role-badge user-info">Rice Mill Operator</div>
     </div>
 
     <div class="sidebar-user">
         <div class="d-flex align-items-center gap-2">
-            <div class="avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
-            <div>
+            <div class="avatar" style="flex-shrink:0;">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
+            <div class="user-info" style="overflow:hidden;white-space:nowrap;">
                 <div class="username">{{ Auth::user()->name }}</div>
                 <div class="role">Rice Mill</div>
             </div>
@@ -476,55 +599,72 @@
     <nav class="sidebar-nav">
         <div class="nav-section-label">Utama</div>
         <a href="{{ route('ricemill.dashboard') }}"
-           class="nav-link {{ request()->routeIs('ricemill.dashboard') ? 'active' : '' }}">
-            <span class="iconify" data-icon="heroicons:squares-2x2"></span> Dashboard
+           class="nav-link {{ request()->routeIs('ricemill.dashboard') ? 'active' : '' }}"
+           data-tooltip="Dashboard">
+            <span class="iconify" data-icon="heroicons:squares-2x2" style="flex-shrink:0;"></span>
+            <span class="nav-text"> Dashboard</span>
         </a>
 
         <div class="nav-section-label">Penerimaan Gabah</div>
         <a href="{{ route('ricemill.penerimaan-gabah.index') }}"
-           class="nav-link {{ request()->routeIs('ricemill.penerimaan-gabah.*') ? 'active' : '' }}">
-            <span class="iconify" data-icon="heroicons:inbox-stack"></span> Penerimaan Gabah
+           class="nav-link {{ request()->routeIs('ricemill.penerimaan-gabah.*') ? 'active' : '' }}"
+           data-tooltip="Penerimaan Gabah">
+            <span class="iconify" data-icon="heroicons:inbox-stack" style="flex-shrink:0;"></span>
+            <span class="nav-text"> Penerimaan Gabah</span>
         </a>
 
         <div class="nav-section-label">Operasional</div>
         <a href="{{ route('ricemill.operasional.index') }}"
-           class="nav-link {{ request()->routeIs('ricemill.operasional.*') ? 'active' : '' }}">
-            <span class="iconify" data-icon="heroicons:cog-6-tooth"></span> Operasional Penggilingan
+           class="nav-link {{ request()->routeIs('ricemill.operasional.*') ? 'active' : '' }}"
+           data-tooltip="Operasional">
+            <span class="iconify" data-icon="heroicons:cog-6-tooth" style="flex-shrink:0;"></span>
+            <span class="nav-text"> Operasional Penggilingan</span>
         </a>
         <a href="{{ route('ricemill.produksi.index') }}"
-           class="nav-link {{ request()->routeIs('ricemill.produksi.*') ? 'active' : '' }}">
-            <span class="iconify" data-icon="heroicons:arrow-trending-up"></span> Riwayat Produksi
+           class="nav-link {{ request()->routeIs('ricemill.produksi.*') ? 'active' : '' }}"
+           data-tooltip="Riwayat Produksi">
+            <span class="iconify" data-icon="heroicons:arrow-trending-up" style="flex-shrink:0;"></span>
+            <span class="nav-text"> Riwayat Produksi</span>
         </a>
 
         <div class="nav-section-label">Distribusi</div>
         <a href="{{ route('ricemill.pengiriman.index') }}"
-           class="nav-link {{ request()->routeIs('ricemill.pengiriman.*') ? 'active' : '' }}">
-            <span class="iconify" data-icon="heroicons:truck"></span> Pengiriman Beras
+           class="nav-link {{ request()->routeIs('ricemill.pengiriman.*') ? 'active' : '' }}"
+           data-tooltip="Pengiriman Beras">
+            <span class="iconify" data-icon="heroicons:truck" style="flex-shrink:0;"></span>
+            <span class="nav-text"> Pengiriman Beras</span>
         </a>
 
         <div class="nav-section-label">Keuangan</div>
         <a href="{{ route('ricemill.keuangan.index') }}"
-           class="nav-link {{ request()->routeIs('ricemill.keuangan.*') ? 'active' : '' }}">
-            <span class="iconify" data-icon="heroicons:presentation-chart-bar"></span> Laporan Keuangan
+           class="nav-link {{ request()->routeIs('ricemill.keuangan.*') ? 'active' : '' }}"
+           data-tooltip="Laporan Keuangan">
+            <span class="iconify" data-icon="heroicons:presentation-chart-bar" style="flex-shrink:0;"></span>
+            <span class="nav-text"> Laporan Keuangan</span>
         </a>
     </nav>
 
     <div class="sidebar-footer">
         <form id="logout-form" action="{{ route('logout') }}" method="POST">
             @csrf
-            <button type="button" onclick="confirmLogout()" class="nav-link w-100" style="background:none;border:none;cursor:pointer;text-align:left;">
-                <span class="iconify" data-icon="heroicons:arrow-left-on-rectangle"></span> Keluar
+            <button type="button" onclick="confirmLogout()" class="nav-link w-100"
+                    data-tooltip="Keluar"
+                    style="background:none;border:none;cursor:pointer;text-align:left;">
+                <span class="iconify" data-icon="heroicons:arrow-left-on-rectangle" style="flex-shrink:0;"></span>
+                <span class="nav-text"> Keluar</span>
             </button>
         </form>
     </div>
 </aside>
 
-<div class="main-content">
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="main-content" id="mainContent">
 
     <div class="topbar">
         <div class="d-flex align-items-center gap-3">
-            <button class="btn btn-light d-md-none p-1 border-0 shadow-sm" id="mobileMenuBtn" style="background:#fff;">
-                <span class="iconify text-slate-700" data-icon="heroicons:bars-3" style="width:24px;height:24px;"></span>
+            <button class="sidebar-toggle-btn" id="sidebarToggleBtn" title="Buka/Tutup Sidebar">
+                <span class="iconify" data-icon="heroicons:bars-3" style="width:20px;height:20px;"></span>
             </button>
             <div>
                 <h1 class="page-title">@yield('page-title', 'Dashboard')</h1>
@@ -565,20 +705,61 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const mobileBtn = document.getElementById('mobileMenuBtn');
-        const sidebar = document.getElementById('sidebar');
-        if(mobileBtn && sidebar) {
-            mobileBtn.addEventListener('click', function() {
-                sidebar.classList.toggle('open');
-            });
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar     = document.getElementById('sidebar');
+        const toggleBtn   = document.getElementById('sidebarToggleBtn');
+        const overlay     = document.getElementById('sidebarOverlay');
+        const body        = document.body;
+        const isMobile    = () => window.innerWidth <= 768;
+        const STORAGE_KEY = 'simonTaniSidebarOpen_ricemill';
+
+        function applyState(open) {
+            if (isMobile()) {
+                sidebar.classList.toggle('open', open);
+                sidebar.classList.remove('collapsed');
+                overlay.classList.toggle('visible', open);
+                body.classList.remove('sidebar-collapsed');
+            } else {
+                sidebar.classList.toggle('collapsed', !open);
+                sidebar.classList.remove('open');
+                overlay.classList.remove('visible');
+                body.classList.toggle('sidebar-collapsed', !open);
+            }
         }
+
+        const savedOpen = localStorage.getItem(STORAGE_KEY);
+        const isOpen = savedOpen === null ? true : savedOpen === 'true';
+        applyState(isOpen);
+
+        toggleBtn.addEventListener('click', function () {
+            const currentlyOpen = isMobile()
+                ? sidebar.classList.contains('open')
+                : !sidebar.classList.contains('collapsed');
+            const newOpen = !currentlyOpen;
+            applyState(newOpen);
+            if (!isMobile()) localStorage.setItem(STORAGE_KEY, newOpen);
+        });
+
+        overlay.addEventListener('click', function () { applyState(false); });
+
+        window.addEventListener('resize', function () {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            const open  = saved === null ? true : saved === 'true';
+            if (!isMobile()) {
+                overlay.classList.remove('visible');
+                sidebar.classList.remove('open');
+                applyState(open);
+            } else {
+                sidebar.classList.remove('collapsed');
+                body.classList.remove('sidebar-collapsed');
+            }
+        });
     });
 
     function confirmLogout() {
         Swal.fire({
             title: 'Yakin ingin keluar?',
-            text: "Sesi Anda akan diakhiri.",
+            text: 'Sesi Anda akan diakhiri.',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#1a5c38',
@@ -586,9 +767,7 @@
             confirmButtonText: 'Ya, Keluar',
             cancelButtonText: 'Batal'
         }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('logout-form').submit();
-            }
+            if (result.isConfirmed) document.getElementById('logout-form').submit();
         });
     }
 </script>
