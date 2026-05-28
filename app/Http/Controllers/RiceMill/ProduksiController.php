@@ -27,10 +27,31 @@ class ProduksiController extends Controller
 
         $produksi = $query->latest('tanggal_proses')->paginate(10)->withQueryString();
 
-        // Data perbandingan 6 bulan terakhir untuk chart
+        $targetDate = now();
+        if ($request->filled('tahun')) {
+            $tahun = (int)$request->tahun;
+            $bulan = $request->filled('bulan') ? (int)$request->bulan : 12;
+            try {
+                $targetDate = \Carbon\Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
+            } catch (\Exception $e) {
+                $targetDate = now();
+            }
+        } elseif ($request->filled('bulan')) {
+            $bulan = (int)$request->bulan;
+            try {
+                $targetDate = \Carbon\Carbon::createFromDate(now()->year, $bulan, 1)->endOfMonth();
+            } catch (\Exception $e) {
+                $targetDate = now();
+            }
+        }
+
+        // Data perbandingan 6 bulan terakhir dari targetDate untuk chart
         $perbandingan = RiwayatProduksi::where('user_id', Auth::id())
             ->selectRaw('YEAR(tanggal_proses) as tahun, MONTH(tanggal_proses) as bulan, SUM(jumlah_beras) as total_beras, SUM(jumlah_gabah) as total_gabah')
-            ->where('tanggal_proses', '>=', now()->subMonths(5)->startOfMonth())
+            ->whereBetween('tanggal_proses', [
+                $targetDate->copy()->subMonths(5)->startOfMonth()->toDateString(),
+                $targetDate->copy()->endOfMonth()->toDateString()
+            ])
             ->groupByRaw('YEAR(tanggal_proses), MONTH(tanggal_proses)')
             ->orderByRaw('YEAR(tanggal_proses), MONTH(tanggal_proses)')
             ->get();

@@ -12,7 +12,7 @@
     <div class="card-header-clean">
         <h5>Edit Profil Lahan</h5>
         <a href="{{ route('petani.lahan.index') }}" class="btn-outline-custom" style="font-size:.8rem;padding:6px 12px;">
-            <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Kembali
+            <span class="iconify" data-icon="heroicons:arrow-left" style="width:14px;height:14px;"></span> Kembali
         </a>
     </div>
 
@@ -83,7 +83,7 @@
                         </div>
                     @endif
                     <div class="upload-zone" onclick="document.getElementById('foto').click()">
-                        <i data-lucide="image" style="width:32px;height:32px;color:var(--text-muted);margin-bottom:8px;"></i>
+                        <span class="iconify" data-icon="heroicons:photo" style="width:32px;height:32px;color:var(--text-muted);margin-bottom:8px;"></span>
                         <div style="font-size:.88rem;color:var(--text-muted);">
                             Klik untuk ganti foto lahan<br>
                             <span style="font-size:.78rem;">JPG, PNG — maks. 2MB</span>
@@ -100,7 +100,7 @@
 
             <div class="d-flex gap-3 mt-4">
                 <button type="submit" class="btn-primary-custom">
-                    <i data-lucide="save" style="width:16px;height:16px;"></i>
+                    <span class="iconify" data-icon="heroicons:check" style="width:16px;height:16px;"></span>
                     Simpan Perubahan
                 </button>
                 <a href="{{ route('petani.lahan.index') }}" class="btn-outline-custom">Batal</a>
