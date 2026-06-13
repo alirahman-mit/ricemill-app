@@ -1,12 +1,25 @@
 {
   "version": 2,
+  "buildCommand": "npm install --ignore-scripts && npm run build",
   "outputDirectory": "public",
   "functions": {
     "api/index.php": {
-      "runtime": "vercel-php@0.9.0"
+      "runtime": "vercel-php@0.7.3",
+      "maxDuration": 10
     }
   },
   "routes": [
+    {
+      "src": "/build/(.*)",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      },
+      "continue": true
+    },
+    {
+      "src": "/(.*)\\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|map)",
+      "continue": true
+    },
     {
       "src": "/(.*)\\.php",
       "dest": "/api/index.php"
@@ -24,17 +37,30 @@
     }
   ],
   "env": {
+    "APP_NAME": "Rice Mill App",
     "APP_ENV": "production",
-    "APP_DEBUG": "false",
-    "APP_CONFIG_CACHE": "/tmp/config.php",
-    "APP_EVENTS_CACHE": "/tmp/events.php",
-    "APP_PACKAGES_CACHE": "/tmp/packages.php",
-    "APP_ROUTES_CACHE": "/tmp/routes.php",
-    "APP_SERVICES_CACHE": "/tmp/services.php",
-    "VIEW_COMPILED_PATH": "/tmp",
+    "APP_DEBUG": "true",
+    "APP_KEY": "base64:VjUzTHxccS32jnaTIzlaKPIdr7ztjAUo96W//Yawi30=",
+    "APP_URL": "https://ricemill4u.vercel.app",
+    "APP_TIMEZONE": "Asia/Jakarta",
+    "LARAVEL_STORAGE_PATH": "/tmp/storage",
+    "APP_CONFIG_CACHE": "/tmp/bootstrap/cache/config.php",
+    "APP_EVENTS_CACHE": "/tmp/bootstrap/cache/events.php",
+    "APP_PACKAGES_CACHE": "/tmp/bootstrap/cache/packages.php",
+    "APP_ROUTES_CACHE": "/tmp/bootstrap/cache/routes-v7.php",
+    "APP_SERVICES_CACHE": "/tmp/bootstrap/cache/services.php",
+    "VIEW_COMPILED_PATH": "/tmp/storage/framework/views",
     "CACHE_STORE": "array",
     "CACHE_DRIVER": "array",
     "SESSION_DRIVER": "cookie",
-    "LOG_CHANNEL": "stderr"
+    "SESSION_ENCRYPT": "false",
+    "LOG_CHANNEL": "stderr",
+    "LOG_LEVEL": "debug",
+    "DB_CONNECTION": "sqlite",
+    "DB_DATABASE": "/tmp/database.sqlite",
+    "FILESYSTEM_DISK": "local",
+    "BROADCAST_CONNECTION": "log",
+    "QUEUE_CONNECTION": "sync",
+    "MAIL_MAILER": "log"
   }
 }
