@@ -24,12 +24,6 @@ if ($storagePath) {
         }
     }
 
-    // Create SQLite database file
-    $dbPath = '/tmp/database.sqlite';
-    if (!file_exists($dbPath)) {
-        @touch($dbPath);
-    }
-
     // Run standalone migration (raw PDO, no Laravel bootstrap needed)
     $migrationLock = '/tmp/.migrations_done';
     if (!file_exists($migrationLock)) {

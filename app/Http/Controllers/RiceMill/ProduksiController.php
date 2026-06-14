@@ -47,13 +47,13 @@ class ProduksiController extends Controller
 
         // Data perbandingan 6 bulan terakhir dari targetDate untuk chart
         $perbandingan = RiwayatProduksi::where('user_id', Auth::id())
-            ->selectRaw('YEAR(tanggal_proses) as tahun, MONTH(tanggal_proses) as bulan, SUM(jumlah_beras) as total_beras, SUM(jumlah_gabah) as total_gabah')
+            ->selectRaw('EXTRACT(YEAR FROM tanggal_proses) as tahun, EXTRACT(MONTH FROM tanggal_proses) as bulan, SUM(jumlah_beras) as total_beras, SUM(jumlah_gabah) as total_gabah')
             ->whereBetween('tanggal_proses', [
                 $targetDate->copy()->subMonths(5)->startOfMonth()->toDateString(),
                 $targetDate->copy()->endOfMonth()->toDateString()
             ])
-            ->groupByRaw('YEAR(tanggal_proses), MONTH(tanggal_proses)')
-            ->orderByRaw('YEAR(tanggal_proses), MONTH(tanggal_proses)')
+            ->groupByRaw('EXTRACT(YEAR FROM tanggal_proses), EXTRACT(MONTH FROM tanggal_proses)')
+            ->orderByRaw('EXTRACT(YEAR FROM tanggal_proses), EXTRACT(MONTH FROM tanggal_proses)')
             ->get();
 
         $tahunList = range(now()->year - 2, now()->year);
@@ -97,7 +97,7 @@ class ProduksiController extends Controller
 
         // Cek rendemen rendah (misal di bawah 60%)
         $rendemen = ($request->jumlah_beras / $operasional->jumlah_gabah_masuk) * 100;
-        $validated['notifikasi_rendemen_rendah'] = $rendemen < 60;
+        $validated['notifikasi_rendemen_rendah'] = $rendemen < 60 ? 'true' : 'false';
 
         RiwayatProduksi::create($validated);
 
