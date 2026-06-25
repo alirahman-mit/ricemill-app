@@ -29,7 +29,8 @@ class DashboardController extends Controller
             ->get();
 
         $recentSetoran = SetoranPenggilingan::where('user_id', $userId)
-            ->latest()
+            ->with('ricemill')
+            ->latest('tanggal_setoran')
             ->take(5)
             ->get();
 

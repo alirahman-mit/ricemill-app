@@ -661,6 +661,20 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@if(session('error') && str_contains(session('error'), 'Out of Stock'))
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        Swal.fire({
+            title: 'Out of Stock!',
+            text: '{{ session('error') }}',
+            icon: 'error',
+            confirmButtonColor: '#1a5c38',
+            confirmButtonText: 'Mengerti'
+        });
+    });
+</script>
+@endif
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const sidebar     = document.getElementById('sidebar');

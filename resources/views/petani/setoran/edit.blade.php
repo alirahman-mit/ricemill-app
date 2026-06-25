@@ -19,6 +19,36 @@
             @csrf @method('PUT')
             <div class="row g-3">
                 <div class="col-md-6">
+                    <label class="form-label-custom">Pilih Ricemill (Penggilingan) <span style="color:#c0392b;">*</span></label>
+                    <select name="ricemill_id" class="form-select-custom @error('ricemill_id') is-invalid @enderror" required>
+                        <option value="">-- Pilih Ricemill --</option>
+                        @foreach($ricemills as $rm)
+                            <option value="{{ $rm->id }}" {{ (old('ricemill_id') ?? $setoran->ricemill_id) == $rm->id ? 'selected' : '' }}>
+                                {{ $rm->name }} ({{ $rm->email }})
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('ricemill_id')
+                        <div style="color:#c0392b;font-size:.8rem;margin-top:4px;">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label-custom">Pilih Asal Lahan <span class="text-muted">(Opsional)</span></label>
+                    <select name="profil_lahan_id" class="form-select-custom @error('profil_lahan_id') is-invalid @enderror">
+                        <option value="">-- Tidak Memilih Lahan --</option>
+                        @foreach($lahans as $lahan)
+                            <option value="{{ $lahan->id }}" {{ (old('profil_lahan_id') ?? $setoran->profil_lahan_id) == $lahan->id ? 'selected' : '' }}>
+                                {{ $lahan->nama_lahan }} ({{ $lahan->lokasi }})
+                            </option>
+                        @endforeach
+                    </select>
+                    <small class="text-muted" style="font-size:0.75rem;">Lahan akan dikirim ke Ricemill tujuan sebagai data Asal Lahan.</small>
+                    @error('profil_lahan_id')
+                        <div style="color:#c0392b;font-size:.8rem;margin-top:4px;">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-md-6">
                     <label class="form-label-custom">Tanggal Setoran <span style="color:#c0392b;">*</span></label>
                     <input type="date" name="tanggal_setoran"
                            value="{{ old('tanggal_setoran', $setoran->tanggal_setoran->format('Y-m-d')) }}"
@@ -32,31 +62,10 @@
                            class="form-control-custom">
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-12">
                     <label class="form-label-custom">Jumlah Setoran (kg)</label>
                     <input type="number" name="jumlah_setoran" step="0.01"
                            value="{{ old('jumlah_setoran', $setoran->jumlah_setoran) }}"
-                           class="form-control-custom">
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label-custom">Biaya Penggilingan (Rp)</label>
-                    <input type="number" name="biaya_penggilingan"
-                           value="{{ old('biaya_penggilingan', $setoran->biaya_penggilingan) }}"
-                           class="form-control-custom">
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label-custom">Hasil Bersih (kg)</label>
-                    <input type="number" name="hasil_bersih" step="0.01"
-                           value="{{ old('hasil_bersih', $setoran->hasil_bersih) }}"
-                           class="form-control-custom">
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label-custom">Total Pendapatan (Rp)</label>
-                    <input type="number" name="total_pendapatan"
-                           value="{{ old('total_pendapatan', $setoran->total_pendapatan) }}"
                            class="form-control-custom">
                 </div>
 

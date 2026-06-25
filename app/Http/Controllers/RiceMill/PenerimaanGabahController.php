@@ -22,14 +22,15 @@ class PenerimaanGabahController extends Controller
                   ->orWhere('asal_lahan', 'like', '%' . $request->search . '%');
         }
 
-        $penerimaan = $query->latest('tanggal')->paginate(10)->withQueryString();
+        $penerimaan = $query->with('setoran')->latest('tanggal')->paginate(10)->withQueryString();
 
         return view('ricemill.penerimaan-gabah.index', compact('penerimaan'));
     }
 
     public function create()
     {
-        return view('ricemill.penerimaan-gabah.create');
+        $petanis = \App\Models\User::where('role', 'petani')->get();
+        return view('ricemill.penerimaan-gabah.create', compact('petanis'));
     }
 
     public function store(Request $request)
@@ -66,7 +67,8 @@ class PenerimaanGabahController extends Controller
     public function edit(PenerimaanGabah $penerimaanGabah)
     {
         abort_if($penerimaanGabah->user_id !== Auth::id(), 403);
-        return view('ricemill.penerimaan-gabah.edit', ['penerimaan' => $penerimaanGabah]);
+        $petanis = \App\Models\User::where('role', 'petani')->get();
+        return view('ricemill.penerimaan-gabah.edit', ['penerimaan' => $penerimaanGabah, 'petanis' => $petanis]);
     }
 
     public function update(Request $request, PenerimaanGabah $penerimaanGabah)
@@ -82,6 +84,9 @@ class PenerimaanGabahController extends Controller
             'status'         => 'required|in:menunggu,diterima,diproses,selesai',
             'bukti_foto'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'catatan'        => 'nullable|string',
+            'biaya_penggilingan' => 'nullable|numeric|min:0',
+            'hasil_bersih'       => 'nullable|numeric|min:0',
+            'total_pendapatan'   => 'nullable|numeric|min:0',
         ]);
 
         if ($request->hasFile('bukti_foto')) {
@@ -92,6 +97,15 @@ class PenerimaanGabahController extends Controller
         }
 
         $penerimaanGabah->update($validated);
+
+        if ($penerimaanGabah->setoran_id) {
+            $penerimaanGabah->setoran->update([
+                'status' => $request->status === 'selesai' ? 'selesai' : ($request->status === 'menunggu' ? 'pending' : 'diproses'),
+                'biaya_penggilingan' => $request->biaya_penggilingan,
+                'hasil_bersih' => $request->hasil_bersih,
+                'total_pendapatan' => $request->total_pendapatan,
+            ]);
+        }
 
         return redirect()->route('ricemill.penerimaan-gabah.index')
             ->with('success', 'Data penerimaan berhasil diperbarui!');

@@ -21,19 +21,63 @@ class KeuanganController extends Controller
         'Lain-lain',
     ];
 
-    public function index()
+    public function index(Request $request)
     {
-        $keuangan = KeuanganRicemill::where('user_id', Auth::id())
-            ->latest('tanggal')
-            ->paginate(10);
+        $query = KeuanganRicemill::where('user_id', Auth::id());
 
-        $totalPemasukan = KeuanganRicemill::where('user_id', Auth::id())
-            ->where('tipe', 'pemasukan')->sum('jumlah');
+        // Dropdown Filter Bulan (Y-m)
+        $selectedBulan = $request->get('bulan');
+        if ($selectedBulan && $selectedBulan !== 'all') {
+            $query->whereMonth('tanggal', substr($selectedBulan, 5, 2))
+                  ->whereYear('tanggal', substr($selectedBulan, 0, 4));
+        }
 
-        $totalPengeluaran = KeuanganRicemill::where('user_id', Auth::id())
-            ->where('tipe', 'pengeluaran')->sum('jumlah');
+        $keuangan = $query->clone()->latest('tanggal')->paginate(10)->withQueryString();
 
-        return view('ricemill.keuangan.index', compact('keuangan', 'totalPemasukan', 'totalPengeluaran'));
+        $totalPemasukan = $query->clone()->where('tipe', 'pemasukan')->sum('jumlah');
+        $totalPengeluaran = $query->clone()->where('tipe', 'pengeluaran')->sum('jumlah');
+
+        // Untuk daftar Pemasukan, Pengeluaran, dan Overall per bulan, kita ambil semua data tanpa filter bulan
+        // agar user tetap bisa melihat perbandingan antar bulan.
+        $allKeuangan = KeuanganRicemill::where('user_id', Auth::id())->get();
+
+        $pemasukanPerBulan = $allKeuangan->where('tipe', 'pemasukan')
+            ->groupBy(fn($item) => \Carbon\Carbon::parse($item->tanggal)->format('Y-m'))
+            ->map(fn($row) => $row->sum('jumlah'))
+            ->sortKeysDesc();
+
+        $pengeluaranPerBulan = $allKeuangan->where('tipe', 'pengeluaran')
+            ->groupBy(fn($item) => \Carbon\Carbon::parse($item->tanggal)->format('Y-m'))
+            ->map(fn($row) => $row->sum('jumlah'))
+            ->sortKeysDesc();
+
+        $overallPerBulan = collect();
+        $semuaBulan = $pemasukanPerBulan->keys()->merge($pengeluaranPerBulan->keys())->unique()->sortDesc();
+        foreach ($semuaBulan as $b) {
+            $pemasukan = $pemasukanPerBulan->get($b, 0);
+            $pengeluaran = $pengeluaranPerBulan->get($b, 0);
+            $overallPerBulan->put($b, $pemasukan - $pengeluaran);
+        }
+
+        // Kategori Pemasukan & Pengeluaran (terpengaruh filter)
+        $kategoriPemasukan = $query->clone()->where('tipe', 'pemasukan')
+            ->select('kategori', \DB::raw('SUM(jumlah) as total'))
+            ->groupBy('kategori')
+            ->get();
+
+        $kategoriPengeluaran = $query->clone()->where('tipe', 'pengeluaran')
+            ->select('kategori', \DB::raw('SUM(jumlah) as total'))
+            ->groupBy('kategori')
+            ->get();
+
+        // Daftar opsi bulan untuk dropdown (dari semua data)
+        $bulanOptions = $semuaBulan;
+
+        return view('ricemill.keuangan.index', compact(
+            'keuangan', 'totalPemasukan', 'totalPengeluaran', 
+            'pemasukanPerBulan', 'pengeluaranPerBulan', 'overallPerBulan',
+            'kategoriPemasukan', 'kategoriPengeluaran', 'selectedBulan', 'bulanOptions'
+        ));
     }
 
     public function create()

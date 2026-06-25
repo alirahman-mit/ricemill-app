@@ -11,7 +11,7 @@ class SetoranPenggilingan extends Model
     protected $table = 'setoran_penggilingan';
 
     protected $fillable = [
-        'user_id', 'tanggal_setoran', 'jenis_hasil_panen', 'jumlah_setoran',
+        'user_id', 'ricemill_id', 'profil_lahan_id', 'tanggal_setoran', 'jenis_hasil_panen', 'jumlah_setoran',
         'biaya_penggilingan', 'hasil_bersih', 'total_pendapatan',
         'bukti_nota', 'catatan', 'status'
     ];
@@ -29,6 +29,16 @@ class SetoranPenggilingan extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function ricemill(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'ricemill_id');
+    }
+
+    public function profilLahan(): BelongsTo
+    {
+        return $this->belongsTo(ProfilLahan::class, 'profil_lahan_id');
+    }
+
     public function getStatusBadgeAttribute(): string
     {
         return match($this->status) {
@@ -37,5 +47,10 @@ class SetoranPenggilingan extends Model
             'selesai'  => 'success',
             default    => 'secondary',
         };
+    }
+
+    public function penerimaan_gabah()
+    {
+        return $this->hasOne(PenerimaanGabah::class, 'setoran_id');
     }
 }

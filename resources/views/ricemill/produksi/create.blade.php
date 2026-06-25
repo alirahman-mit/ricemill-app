@@ -108,6 +108,8 @@
     const previewBox = document.getElementById('rendemen-preview');
     const previewVal = document.getElementById('rendemen-value');
 
+    const submitBtn = document.querySelector('button[type="submit"]');
+
     function hitungRendemen() {
         const selectedOption = selectOp.options[selectOp.selectedIndex];
         const gabah  = parseFloat(selectedOption?.getAttribute('data-gabah') || 0);
@@ -118,19 +120,34 @@
             previewBox.style.background = '#f0fdf4';
             previewBox.style.borderColor = '#b2dcc4';
             previewBox.style.color = '#1a5c38';
+            submitBtn.disabled = true;
             return;
         }
 
         const rendemen = ((beras / gabah) * 100).toFixed(1);
         const rendah   = parseFloat(rendemen) < 60;
+        const tinggi   = parseFloat(rendemen) > 100;
+        const tidakValid = rendah || tinggi;
 
-        previewVal.textContent = `Rendemen: ${rendemen}% ${rendah ? '⚠️ DI BAWAH STANDAR (min. 60%)' : '✅ Normal'}`;
-        previewBox.style.background = rendah ? '#fef2f2' : '#f0fdf4';
-        previewBox.style.borderColor = rendah ? '#fca5a5' : '#b2dcc4';
-        previewBox.style.color       = rendah ? '#991b1b' : '#1a5c38';
+        if (rendah) {
+            previewVal.textContent = `Rendemen: ${rendemen}% ⚠️ DI BAWAH STANDAR (min. 60%)`;
+        } else if (tinggi) {
+            previewVal.textContent = `Rendemen: ${rendemen}% ⚠️ TIDAK MASUK AKAL (maks. 100%)`;
+        } else {
+            previewVal.textContent = `Rendemen: ${rendemen}% ✅ Normal`;
+        }
+
+        previewBox.style.background = tidakValid ? '#fef2f2' : '#f0fdf4';
+        previewBox.style.borderColor = tidakValid ? '#fca5a5' : '#b2dcc4';
+        previewBox.style.color       = tidakValid ? '#991b1b' : '#1a5c38';
+        
+        submitBtn.disabled = tidakValid;
     }
 
     selectOp.addEventListener('change', hitungRendemen);
-    inputBeras.addEventListener('input',  hitungRendemen);
+    inputBeras.addEventListener('input', hitungRendemen);
+    
+    // Inisialisasi awal agar tombol disubmit disable jika kosong
+    document.addEventListener('DOMContentLoaded', hitungRendemen);
 </script>
 @endpush

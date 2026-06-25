@@ -22,7 +22,12 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label-custom">Nama Petani / Pemasok</label>
-                            <input type="text" class="form-control-custom" name="nama_petani" value="{{ $penerimaan->nama_petani }}" required>
+                            <input list="petani-list" type="text" class="form-control-custom" name="nama_petani" value="{{ $penerimaan->nama_petani }}" required>
+                            <datalist id="petani-list">
+                                @foreach($petanis as $petani)
+                                    <option value="{{ $petani->name }}">
+                                @endforeach
+                            </datalist>
                         </div>
                     </div>
 
@@ -68,6 +73,29 @@
                             </div>
                         @endif
                     </div>
+
+                    @if($penerimaan->setoran_id)
+                    <hr class="my-4">
+                    <h6 class="mb-3 text-primary fw-bold"><span class="iconify me-1" data-icon="heroicons:banknotes"></span> Informasi Keuangan (Setoran Petani)</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Biaya Penggilingan (Rp)</label>
+                            <input type="number" step="0.01" class="form-control-custom" name="biaya_penggilingan" value="{{ $penerimaan->setoran->biaya_penggilingan ?? 0 }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Hasil Bersih (Kg)</label>
+                            <input type="number" step="0.01" class="form-control-custom" name="hasil_bersih" value="{{ $penerimaan->setoran->hasil_bersih ?? 0 }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-custom">Total Pendapatan Petani (Rp)</label>
+                            <input type="number" step="0.01" class="form-control-custom" name="total_pendapatan" value="{{ $penerimaan->setoran->total_pendapatan ?? 0 }}">
+                        </div>
+                    </div>
+                    <div class="alert alert-info py-2" role="alert">
+                        <small>Data ini akan diperbarui ke Nota Setoran Petani.</small>
+                    </div>
+                    <hr class="mb-4">
+                    @endif
 
                     <div class="mb-4">
                         <label class="form-label-custom">Catatan / Keterangan</label>

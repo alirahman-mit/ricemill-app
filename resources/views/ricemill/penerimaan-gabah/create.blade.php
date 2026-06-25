@@ -21,7 +21,12 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label-custom">Nama Petani / Pemasok</label>
-                            <input type="text" class="form-control-custom" name="nama_petani" placeholder="Contoh: Bpk. Slamet" required>
+                            <input list="petani-list" type="text" class="form-control-custom" name="nama_petani" placeholder="Ketik nama petani..." required>
+                            <datalist id="petani-list">
+                                @foreach($petanis as $petani)
+                                    <option value="{{ $petani->name }}">
+                                @endforeach
+                            </datalist>
                         </div>
                     </div>
 

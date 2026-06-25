@@ -13,6 +13,7 @@ class SetoranController extends Controller
     public function index()
     {
         $setorans = SetoranPenggilingan::where('user_id', Auth::id())
+            ->with('ricemill')
             ->latest()
             ->paginate(10);
 
@@ -24,18 +25,19 @@ class SetoranController extends Controller
 
     public function create()
     {
-        return view('petani.setoran.create');
+        $ricemills = \App\Models\User::where('role', 'rice_mill')->get();
+        $lahans = \App\Models\ProfilLahan::where('user_id', Auth::id())->get();
+        return view('petani.setoran.create', compact('ricemills', 'lahans'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'ricemill_id'        => 'required|exists:users,id',
+            'profil_lahan_id'    => 'nullable|exists:profil_lahans,id',
             'tanggal_setoran'    => 'required|date',
             'jenis_hasil_panen'  => 'required|string|max:100',
             'jumlah_setoran'     => 'required|numeric|min:0.01',
-            'biaya_penggilingan' => 'nullable|numeric|min:0',
-            'hasil_bersih'       => 'nullable|numeric|min:0',
-            'total_pendapatan'   => 'nullable|numeric|min:0',
             'catatan'            => 'nullable|string',
             'bukti_nota'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
@@ -46,7 +48,28 @@ class SetoranController extends Controller
             $validated['bukti_nota'] = $request->file('bukti_nota')->store('setoran', 'public');
         }
 
-        SetoranPenggilingan::create($validated);
+        $setoran = SetoranPenggilingan::create($validated);
+        
+        $asal_lahan = '-';
+        if ($setoran->profil_lahan_id) {
+            $lahan = \App\Models\ProfilLahan::find($setoran->profil_lahan_id);
+            if ($lahan) {
+                $asal_lahan = $lahan->nama_lahan . ' (' . $lahan->lokasi . ')';
+            }
+        }
+
+        // Otomatis buat data penerimaan gabah untuk ricemill tujuan
+        \App\Models\PenerimaanGabah::create([
+            'user_id'        => $validated['ricemill_id'], // Operator Ricemill
+            'setoran_id'     => $setoran->id,
+            'nama_petani'    => Auth::user()->name,
+            'asal_lahan'     => $asal_lahan,
+            'tanggal'        => $validated['tanggal_setoran'],
+            'jumlah_gabah'   => $validated['jumlah_setoran'],
+            'kualitas_gabah' => 'kering', // Default kualitas gabah
+            'status'         => 'menunggu',
+            'catatan'        => $validated['catatan'],
+        ]);
 
         return redirect()->route('petani.setoran.index')
             ->with('success', 'Transaksi setoran berhasil dicatat!');
@@ -55,7 +78,9 @@ class SetoranController extends Controller
     public function edit(SetoranPenggilingan $setoran)
     {
         abort_if($setoran->user_id !== Auth::id(), 403);
-        return view('petani.setoran.edit', compact('setoran'));
+        $ricemills = \App\Models\User::where('role', 'rice_mill')->get();
+        $lahans = \App\Models\ProfilLahan::where('user_id', Auth::id())->get();
+        return view('petani.setoran.edit', compact('setoran', 'ricemills', 'lahans'));
     }
 
     public function update(Request $request, SetoranPenggilingan $setoran)
@@ -64,12 +89,11 @@ class SetoranController extends Controller
 
         // BUG FIX: 'status' ditambahkan ke validasi agar perubahan status tersimpan
         $validated = $request->validate([
+            'ricemill_id'        => 'required|exists:users,id',
+            'profil_lahan_id'    => 'nullable|exists:profil_lahans,id',
             'tanggal_setoran'    => 'required|date',
             'jenis_hasil_panen'  => 'required|string|max:100',
             'jumlah_setoran'     => 'required|numeric|min:0.01',
-            'biaya_penggilingan' => 'nullable|numeric|min:0',
-            'hasil_bersih'       => 'nullable|numeric|min:0',
-            'total_pendapatan'   => 'nullable|numeric|min:0',
             'status'             => 'required|in:pending,diproses,selesai',
             'catatan'            => 'nullable|string',
             'bukti_nota'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -83,6 +107,20 @@ class SetoranController extends Controller
         }
 
         $setoran->update($validated);
+        
+        // Update asal_lahan di penerimaan gabah jika berubah
+        if ($setoran->penerimaan_gabah) {
+            $asal_lahan = '-';
+            if ($setoran->profil_lahan_id) {
+                $lahan = \App\Models\ProfilLahan::find($setoran->profil_lahan_id);
+                if ($lahan) {
+                    $asal_lahan = $lahan->nama_lahan . ' (' . $lahan->lokasi . ')';
+                }
+            }
+            $setoran->penerimaan_gabah->update([
+                'asal_lahan' => $asal_lahan,
+            ]);
+        }
 
         return redirect()->route('petani.setoran.index')
             ->with('success', 'Data setoran berhasil diperbarui!');

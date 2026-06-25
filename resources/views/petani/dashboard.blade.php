@@ -139,7 +139,58 @@
                                         default    => 'badge-warning-custom',
                                     };
                                 @endphp
-                                <span class="badge-custom {{ $badge }}">{{ ucfirst($setoran->status) }}</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge-custom {{ $badge }}">{{ ucfirst($setoran->status) }}</span>
+                                    @if($setoran->status === 'selesai' && $setoran->total_pendapatan)
+                                    <button type="button" class="btn btn-sm btn-outline-primary p-1" style="line-height:1;" data-bs-toggle="modal" data-bs-target="#notaModal-{{ $setoran->id }}" title="Lihat Nota">
+                                        <span class="iconify" data-icon="heroicons:document-text" style="width:14px;height:14px;"></span>
+                                    </button>
+
+                                    <!-- Modal Nota -->
+                                    <div class="modal fade" id="notaModal-{{ $setoran->id }}" tabindex="-1" aria-hidden="true">
+                                      <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content" style="border:none;border-radius:12px;">
+                                          <div class="modal-header" style="background:#f8f9fa;border-bottom:1px solid #eee;border-radius:12px 12px 0 0;">
+                                            <h5 class="modal-title fw-bold text-dark"><span class="iconify me-2 text-primary" data-icon="heroicons:document-check"></span>Nota Pembayaran Setoran</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                          </div>
+                                          <div class="modal-body p-4 text-start">
+                                            <div class="text-center mb-4">
+                                                <h4 class="mb-1 fw-bold text-primary">TRX-{{ $setoran->id }}</h4>
+                                                <p class="text-muted small mb-0">{{ $setoran->tanggal_setoran->format('d F Y') }}</p>
+                                            </div>
+                                            <table class="table table-borderless table-sm mb-0">
+                                                <tr>
+                                                    <td class="text-muted">Ricemill Tujuan</td>
+                                                    <td class="text-end fw-medium">{{ $setoran->ricemill->name ?? '-' }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted">Berat Gabah Kotor</td>
+                                                    <td class="text-end fw-medium">{{ number_format($setoran->jumlah_setoran, 0) }} kg</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted">Hasil Bersih</td>
+                                                    <td class="text-end fw-medium">{{ number_format($setoran->hasil_bersih, 0) }} kg</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="text-muted">Biaya Penggilingan</td>
+                                                    <td class="text-end text-danger fw-medium">- Rp {{ number_format($setoran->biaya_penggilingan, 0, ',', '.') }}</td>
+                                                </tr>
+                                                <tr style="border-top:1px dashed #ccc;">
+                                                    <td class="pt-3 fw-bold">Total Pendapatan Bersih</td>
+                                                    <td class="text-end pt-3 fw-bold text-success" style="font-size:1.2rem;">Rp {{ number_format($setoran->total_pendapatan, 0, ',', '.') }}</td>
+                                                </tr>
+                                            </table>
+                                          </div>
+                                          <div class="modal-footer bg-light" style="border-radius:0 0 12px 12px;">
+                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+                                            <button type="button" class="btn btn-primary btn-sm" onclick="window.print()">Cetak</button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @empty

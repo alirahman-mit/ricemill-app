@@ -14,49 +14,70 @@
 
 {{-- STATISTIK RINGKAS --}}
 <div class="row mb-4">
-    <div class="col-md-4">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(234, 179, 8, 0.12); color: #ca8a04;">
-                <span class="iconify" data-icon="heroicons:star"></span>
-            </div>
-            <div>
-                <div class="stat-value" style="font-size:1.1rem;">
-                    @if($terlaris)
-                        {{ $terlaris->jenis_produk }}
-                    @else
-                        <span style="font-size:.85rem;color:#9ca3af;">Belum ada data</span>
-                    @endif
-                </div>
-                <div class="stat-label">🏆 Produk Terlaris</div>
-                @if($terlaris)
-                    <div style="font-size:.78rem;color:#6b7280;margin-top:2px;">
-                        Total terjual: <strong>{{ number_format($terlaris->total_qty) }} pcs</strong>
+    <!-- Kolom Kiri: Statistik Utama -->
+    <div class="col-md-8">
+        <div class="row h-100">
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="stat-card h-100">
+                    <div class="stat-icon" style="background: rgba(22, 163, 74, 0.1); color: #16a34a;">
+                        <span class="iconify" data-icon="heroicons:inbox-stack"></span>
                     </div>
-                @endif
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(22, 163, 74, 0.1); color: #16a34a;">
-                <span class="iconify" data-icon="heroicons:shopping-bag"></span>
-            </div>
-            <div>
-                <div class="stat-value">{{ $pesanan->total() }}</div>
-                <div class="stat-label">Total Pesanan</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
-                <span class="iconify" data-icon="heroicons:banknotes"></span>
-            </div>
-            <div>
-                <div class="stat-value" style="font-size:1.05rem;">
-                    Rp {{ number_format($pesanan->sum('total_harga'), 0, ',', '.') }}
+                    <div>
+                        <div class="stat-value" style="font-size:1.1rem;">{{ number_format($total_stok_beras, 0, ',', '.') }} kg</div>
+                        <div class="stat-label">Stok Beras (Ricemill)</div>
+                    </div>
                 </div>
-                <div class="stat-label">Total Pendapatan (halaman ini)</div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="stat-card h-100">
+                    <div class="stat-icon" style="background: rgba(234, 179, 8, 0.12); color: #ca8a04;">
+                        <span class="iconify" data-icon="heroicons:star"></span>
+                    </div>
+                    <div>
+                        <div class="stat-value" style="font-size:1.1rem;">
+                            @if($terlaris)
+                                {{ \Illuminate\Support\Str::limit($terlaris->jenis_produk, 15) }}
+                            @else
+                                <span style="font-size:.85rem;color:#9ca3af;">Belum ada</span>
+                            @endif
+                        </div>
+                        <div class="stat-label">Terlaris</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="stat-card h-100">
+                    <div class="stat-icon" style="background: rgba(22, 163, 74, 0.1); color: #16a34a;">
+                        <span class="iconify" data-icon="heroicons:shopping-bag"></span>
+                    </div>
+                    <div>
+                        <div class="stat-value" style="font-size:1.1rem;">{{ $pesanan->total() }}</div>
+                        <div class="stat-label">Total Pesanan</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Kolom Kanan: Stok Kemasan Ready -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header-clean py-2 px-3">
+                <h6 class="mb-0 text-success"><span class="iconify" data-icon="heroicons:check-badge"></span> Stok Kemasan Ready</h6>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush" style="max-height: 120px; overflow-y: auto;">
+                    @forelse($stok_kemasan_list as $nama => $jumlah)
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3 border-bottom" style="font-size: 0.85rem;">
+                        {{ $nama }}
+                        <span class="badge bg-success rounded-pill">{{ $jumlah }} pack</span>
+                    </li>
+                    @empty
+                    <li class="list-group-item text-center py-3 text-muted" style="font-size: 0.85rem;">
+                        Semua kemasan habis / kosong.
+                    </li>
+                    @endforelse
+                </ul>
             </div>
         </div>
     </div>
@@ -88,14 +109,23 @@
                     <td>{{ $item->jenis_produk }} ({{ $item->jumlah }} Pcs)</td>
                     <td class="fw-bold">Rp {{ number_format($item->total_harga, 0, ',', '.') }}</td>
                     <td>
-                        <span class="badge-custom {{ $item->status == 'selesai' ? 'badge-success-custom' : ($item->status == 'dibatalkan' ? 'badge-danger-custom' : 'badge-warning-custom') }}">
-                            {{ ucfirst($item->status) }}
-                        </span>
+                        <form action="{{ route('packager.pesanan.update', $item) }}" method="POST" class="d-inline m-0 p-0">
+                            @csrf @method('PUT')
+                            <select name="status" onchange="this.form.submit()" class="form-select-custom p-1 px-2" style="font-size:0.8rem; width:auto; border-color: 
+                                {{ $item->status == 'selesai' ? '#b2dcc4' : ($item->status == 'dibatalkan' ? '#f5b8b8' : '#fde047') }}; 
+                                background-color: {{ $item->status == 'selesai' ? '#e8f5ee' : ($item->status == 'dibatalkan' ? '#fde8e8' : '#fef6e0') }};">
+                                <option value="menunggu" {{ $item->status == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
+                                <option value="diproses" {{ $item->status == 'diproses' ? 'selected' : '' }}>Diproses</option>
+                                <option value="dikirim" {{ $item->status == 'dikirim' ? 'selected' : '' }}>Dikirim</option>
+                                <option value="selesai" {{ $item->status == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                                <option value="dibatalkan" {{ $item->status == 'dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
+                            </select>
+                        </form>
                     </td>
                     <td>
                         <form action="{{ route('packager.pesanan.destroy', $item) }}" method="POST" onsubmit="return confirm('Hapus data ini?')">
                             @csrf @method('DELETE')
-                            <button type="submit" class="btn-outline-custom btn-sm text-danger" style="border-color:#f5b8b8;">
+                            <button type="submit" class="btn-outline-custom btn-sm text-danger" style="border-color:#f5b8b8; padding: 4px 8px;">
                                 <span class="iconify" data-icon="heroicons:trash" style="width:14px;height:14px;"></span>
                             </button>
                         </form>

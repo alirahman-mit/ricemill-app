@@ -12,7 +12,7 @@ class PenerimaanGabah extends Model
     protected $table = 'penerimaan_gabah';
 
     protected $fillable = [
-        'user_id', 'nama_petani', 'asal_lahan', 'tanggal',
+        'user_id', 'setoran_id', 'nama_petani', 'asal_lahan', 'tanggal',
         'jumlah_gabah', 'kualitas_gabah', 'status',
         'bukti_foto', 'catatan',
     ];
@@ -30,5 +30,10 @@ class PenerimaanGabah extends Model
     public function operasional()
     {
         return $this->hasMany(OperasionalPenggilingan::class, 'penerimaan_gabah_id');
+    }
+
+    public function setoran()
+    {
+        return $this->belongsTo(SetoranPenggilingan::class, 'setoran_id');
     }
 }
